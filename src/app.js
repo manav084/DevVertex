@@ -5,6 +5,8 @@ const User = require('./models/user')
 
 app.use(express.json())
 
+app.use(express.static("public"))
+
 
  // Sending a details of a user required for login after signup
 app.post("/signup", async (req,res)=>{
@@ -102,7 +104,7 @@ app.patch("/user", async (req,res)=>{
 
     try {
 
-         const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {new:true})
+         const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {new:true, runValidators:true})
 
          res.send({
             message: "User updated successfully",
@@ -112,7 +114,7 @@ app.patch("/user", async (req,res)=>{
         
     } catch (error) {
 
-            res.status(400).send("Error saving the User" + error.message)    
+            res.status(400).send("Update failed" + error.message)    
 
         
     }
