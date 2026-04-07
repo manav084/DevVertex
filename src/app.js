@@ -98,12 +98,49 @@ app.delete("/user", async (req,res)=> {
 
 // Update the user using patch (patch just replace only  change part )
 
-app.patch("/user", async (req,res)=>{
-    const userId = req.body.userId 
+app.patch("/user/:userId", async (req,res)=>{
+    // const userId = req.params?.userId 
+
+    const {userId} = req.params
     const updatedData = req.body
+
+    if (!userId) {
+  return res.status(400).send("UserId is required");
+}
+
+
+    const allowedUpdates = ["firstName","lastName","photoUrl","about","gender","age", "skills"]
+    const keys = Object.keys(updatedData);
+
+    const isAllowedUpdates = keys.every((k)=>{
+        return allowedUpdates.includes(k)
+    })
+
+    if(!isAllowedUpdates){
+      return   res.status(400).send("Updates not allowed")
+    }
+
+      
 
     try {
 
+        if(updatedData.skills){
+            if(!Array.isArray(updatedData.skills)){
+                   return res.status(400).send("Skills must be an array");
+            }
+        
+
+        if(updatedData.skills.length > 10){
+            throw new Error("Skills cannot be more than 10")
+
+        }
+
+          updatedData.skills = updatedData.skills.map(skill => skill.trim().toLowerCase())
+
+          updatedData.skills = [...new Set(updatedData.skills)]
+
+
+    }
          const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {new:true, runValidators:true})
 
          res.send({
