@@ -14,6 +14,57 @@ app.post("/signup", async (req,res)=>{
     // Creating a  new instance of te User model
     const user = new User(req.body)
     try {
+
+        const {firstName, emailId , password} = req.body;
+
+        if(!firstName,  !emailId, !password){
+            return res.status(400).send("Required fields Missing")
+        }
+
+        const emailRegex = /^\S+@\S+\.\S+$/;
+
+        if(!emailRegex.test(emailId)){
+        return res.status(400).send("Invalid Email Format")
+        }
+
+        if(password.length <8){
+            return res.status(400).send("Password length is less than 8 characters")
+
+        }
+
+        const existingUser = await User.findOne({emailId})
+
+        if(existingUser){
+                        return res.status(400).send("Email already exits")
+
+        }
+        
+        const allowedFields = ["firstName","lastName","emailId","password","age","gender","photoUrl","about","skills"];
+
+        const data = {};
+        Object.keys(req.body).forEach((key) => {
+          if (allowedFields.includes(key)) {
+            data[key] = req.body[key];
+          }
+        });
+
+        // skills validation
+        if (data.skills) {
+          if (!Array.isArray(data.skills)) {
+            return res.status(400).send("Skills must be an array");
+          }
+
+          data.skills = data.skills.map(skill =>
+            skill.trim().toLowerCase()
+          );
+
+          data.skills = [...new Set(data.skills)];
+
+          if (data.skills.length > 10) {
+            return res.status(400).send("Max 10 skills allowed");
+          }
+        }
+
       await  user.save()
         res.send("User Added Successfully")
         
