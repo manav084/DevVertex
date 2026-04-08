@@ -2,6 +2,9 @@ const express = require("express")
   connectDB =require('./config/database.js')
 const app = express();
 const User = require('./models/user')
+  const bcrypt = require('bcrypt')
+
+const {validateSignUpData} = require('./utils/validator.js')
 
 app.use(express.json())
 
@@ -12,30 +15,16 @@ app.use(express.static("public"))
 app.post("/signup", async (req,res)=>{
     
     // Creating a  new instance of te User model
-    const user = new User(req.body)
+    // const user = new User(req.body)
     try {
 
-        const {firstName, emailId , password} = req.body;
+         validateSignUpData(req)
 
-        if(!firstName,  !emailId, !password){
-            return res.status(400).send("Required fields Missing")
-        }
-
-        const emailRegex = /^\S+@\S+\.\S+$/;
-
-        if(!emailRegex.test(emailId)){
-        return res.status(400).send("Invalid Email Format")
-        }
-
-        if(password.length <8){
-            return res.status(400).send("Password length is less than 8 characters")
-
-        }
-
+         const{emailId} = req.body
         const existingUser = await User.findOne({emailId})
 
         if(existingUser){
-                        return res.status(400).send("Email already exits")
+             return res.status(400).send("Email already exits")
 
         }
         
@@ -65,6 +54,12 @@ app.post("/signup", async (req,res)=>{
           }
         }
 
+        // Password Hashing
+        
+        const passwordHash = await bcrypt.hash(data.password,10)
+        data.password = passwordHash;
+         const user = new User(data);
+ 
       await  user.save()
         res.send("User Added Successfully")
         
