@@ -203,6 +203,33 @@ app.patch("/user/:userId", async (req,res)=>{
     }
 })
 
+app.post("/login", async(req,res)=>{
+
+    try {
+
+        const {emailId, password} = req.body;
+
+     const user = await User.findOne({emailId})
+
+     if(!user){
+       throw new Error("Invalid Credentials")
+     }
+     
+     const isValidPassword = await bcrypt.compare(password, user.password)
+
+          if(isValidPassword){
+            res.send("Login Successfull")
+          }else{
+            throw new Error("Invalid Credentials")
+          }
+
+        
+    } catch (error) {
+          res.status(400).send("Error in login the User" + error.message)    
+    }
+     
+})
+
 connectDB().then(()=>{
 
     console.log("Database conneciton established");
