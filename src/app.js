@@ -1,14 +1,16 @@
 const express = require("express")
-  connectDB =require('./config/database.js')
+connectDB =require('./config/database.js')
 const app = express();
 const User = require('./models/user')
-  const bcrypt = require('bcrypt')
-
+const bcrypt = require('bcrypt')
 const {validateSignUpData} = require('./utils/validator.js')
+const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken')
+const {userAuth} = require('./middlewares/auth.js')
 
 app.use(express.json())
-
 app.use(express.static("public"))
+app.use(cookieParser())
 
 
  // Sending a details of a user required for login after signup
@@ -215,13 +217,22 @@ app.post("/login", async(req,res)=>{
        throw new Error("Invalid Credentials")
      }
      
-     const isValidPassword = await bcrypt.compare(password, user.password)
+    //  const isValidPassword = await bcrypt.compare(password, user.password)
 
-          if(isValidPassword){
-            res.send("Login Successfull")
-          }else{
+    const isValidPassword = await user.validatePassword(password)
+
+          if(!isValidPassword){
+            // res.send("Login Successfull")
             throw new Error("Invalid Credentials")
           }
+
+          const token = await user.getJWT()
+
+            // const token = jwt.sign({_id:user._id}, "SECRET_KEY", {expiresIn:"1d"})
+
+            res.cookie("token", token)
+            res.send("Login Successful")
+
 
         
     } catch (error) {
@@ -229,6 +240,63 @@ app.post("/login", async(req,res)=>{
     }
      
 })
+
+app.get("/profile", userAuth , (req,res)=>{
+  try {
+    const user = req.user
+    res.send(user)
+    
+  } catch (error) {
+            res.status(401).send("Error: " + error.message);
+
+  }
+  
+  // try {
+  //   const {token} = req.cookies ; 
+
+  //   if(!token){
+  //     throw new Error("Unauthorized")
+  //   }
+
+  //   // verify token 
+
+  //   const decoded = jwt.verify(token,"SECRET_KEY")
+
+  //   const user = await User.findById(decoded._id)
+  //   res.send(user)
+
+    
+  // } catch (error) {
+
+  //    res.status(401).send("Invalid token" + error.message);
+    
+  // }
+
+
+
+})
+
+app.get("/sendConnectionRequest", userAuth, (req,res)=>{
+    const user = req.user
+
+    res.send( user.firstName + "sent connection request")
+    
+  
+})
+
+//DUMMY COOKIE API-GET 
+
+app.get("/set-cookie", (req,res)=> {
+  res.cookie("test","manav123")
+  res.send("Cookie set")
+})
+
+app.get("/get-cookie",(req,res)=>{
+    console.log(req.cookies);
+    res.send(req.cookies)
+    
+})
+
 
 connectDB().then(()=>{
 
