@@ -2,75 +2,26 @@ const express = require("express")
 connectDB =require('./config/database.js')
 const app = express();
 const User = require('./models/user')
-const bcrypt = require('bcrypt')
-const {validateSignUpData} = require('./utils/validator.js')
 const cookieParser = require('cookie-parser')
-const jwt = require('jsonwebtoken')
-const {userAuth} = require('./middlewares/auth.js')
+
+// const jwt = require('jsonwebtoken')
+// const bcrypt = require('bcrypt')
+// const {validateSignUpData} = require('./utils/validator.js')
 
 app.use(express.json())
 app.use(express.static("public"))
 app.use(cookieParser())
 
+ const authRouter =  require('./routes/auth.js')
+ const profileRouter =  require('./routes/profile.js')
+ const requestRouter =  require('./routes/requests.js')
 
- // Sending a details of a user required for login after signup
-app.post("/signup", async (req,res)=>{
-    
-    // Creating a  new instance of te User model
-    // const user = new User(req.body)
-    try {
-
-         validateSignUpData(req)
-
-         const{emailId} = req.body
-        const existingUser = await User.findOne({emailId})
-
-        if(existingUser){
-             return res.status(400).send("Email already exits")
-
-        }
-        
-        const allowedFields = ["firstName","lastName","emailId","password","age","gender","photoUrl","about","skills"];
-
-        const data = {};
-        Object.keys(req.body).forEach((key) => {
-          if (allowedFields.includes(key)) {
-            data[key] = req.body[key];
-          }
-        });
-
-        // skills validation
-        if (data.skills) {
-          if (!Array.isArray(data.skills)) {
-            return res.status(400).send("Skills must be an array");
-          }
-
-          data.skills = data.skills.map(skill =>
-            skill.trim().toLowerCase()
-          );
-
-          data.skills = [...new Set(data.skills)];
-
-          if (data.skills.length > 10) {
-            return res.status(400).send("Max 10 skills allowed");
-          }
-        }
-
-        // Password Hashing
-        
-        const passwordHash = await bcrypt.hash(data.password,10)
-        data.password = passwordHash;
-         const user = new User(data);
+ app.use("/", authRouter);
+ app.use("/", profileRouter);
+ app.use("/", requestRouter);
  
-      await  user.save()
-        res.send("User Added Successfully")
-        
-    } catch (err) {
-        res.status(400).send("Error saving the User" + err.message)
-        
-    }
+ 
 
-})
 
 
 // Fetch a user by EmailID. if there are multiple  sane email id's it'll fetch only one 
@@ -205,84 +156,10 @@ app.patch("/user/:userId", async (req,res)=>{
     }
 })
 
-app.post("/login", async(req,res)=>{
-
-    try {
-
-        const {emailId, password} = req.body;
-
-     const user = await User.findOne({emailId})
-
-     if(!user){
-       throw new Error("Invalid Credentials")
-     }
-     
-    //  const isValidPassword = await bcrypt.compare(password, user.password)
-
-    const isValidPassword = await user.validatePassword(password)
-
-          if(!isValidPassword){
-            // res.send("Login Successfull")
-            throw new Error("Invalid Credentials")
-          }
-
-          const token = await user.getJWT()
-
-            // const token = jwt.sign({_id:user._id}, "SECRET_KEY", {expiresIn:"1d"})
-
-            res.cookie("token", token)
-            res.send("Login Successful")
-
-
-        
-    } catch (error) {
-          res.status(400).send("Error in login the User" + error.message)    
-    }
-     
-})
-
-app.get("/profile", userAuth , (req,res)=>{
-  try {
-    const user = req.user
-    res.send(user)
-    
-  } catch (error) {
-            res.status(401).send("Error: " + error.message);
-
-  }
-  
-  // try {
-  //   const {token} = req.cookies ; 
-
-  //   if(!token){
-  //     throw new Error("Unauthorized")
-  //   }
-
-  //   // verify token 
-
-  //   const decoded = jwt.verify(token,"SECRET_KEY")
-
-  //   const user = await User.findById(decoded._id)
-  //   res.send(user)
-
-    
-  // } catch (error) {
-
-  //    res.status(401).send("Invalid token" + error.message);
-    
-  // }
 
 
 
-})
 
-app.get("/sendConnectionRequest", userAuth, (req,res)=>{
-    const user = req.user
-
-    res.send( user.firstName + "sent connection request")
-    
-  
-})
 
 //DUMMY COOKIE API-GET 
 

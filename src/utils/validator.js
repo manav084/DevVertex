@@ -16,6 +16,21 @@ const validateSignUpData =(req) =>{
         throw new Error("Weak Password")
     }
 
+   },
+   validateEditProfileData = (req) =>{
+
+
+    const allowedEditFields = ["firstName", "lastName","age","about","skills","photoUrl","gender"]
+    const keys = Object.keys(req.body)
+
+    const isEditAllowed = keys.every((k)=> allowedEditFields.includes(k))
+
+    // if(!isEditAllowed){
+    //     throw new Error("Invalid Fields in Update")
+    // }
+
+  return isEditAllowed;
+   
    }
 
-   module.exports = {validateSignUpData}
+   module.exports = {validateSignUpData , validateEditProfileData}
