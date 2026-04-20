@@ -36,10 +36,53 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req,res)=
 
     const data = await connectionRequest.save()
 
+    const statusMessages = {
+  interested: "sent",
+  ignored: "ignored"
+};
+
     res.json({
         message:`${req.user.firstName} has ${statusMessages[status]} the connection request`,
         data})
    } catch (error) {
        res.status(400).send("Error:" + error.message)}})
+
+requestRouter.post("/request/review/:status/:requestId", userAuth, async(req,res)=> {
+
+    try {
+        // const status = req.params.status
+        const {status,requestId} = req.params
+        const {toUserId} = req.params
+         const loggedInUser = req.user
+         
+        
+
+        const allowedStatus = ["accepted", "rejected"] 
+
+        if(!allowedStatus.includes(status)){
+           throw new Error("Invalid status type:" +status)
+        }
+
+        const connectionRequest = await ConnectionRequest.findOne({
+            _id: requestId,
+            toUserId: loggedInUser._id,
+            status: "interested"
+        })
+
+        if(!connectionRequest){
+            throw new Error("No pending connection request found")
+        }
+
+        connectionRequest.status = status ;
+        const data =   await connectionRequest.save()
+
+        res.json({message: `Connection Request` +status, data})
+
+        
+    } catch (error) {
+         res.status(400).send("Error:" + error.message)
+    }
+
+})       
 
 module.exports = requestRouter;
