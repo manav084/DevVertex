@@ -3,6 +3,7 @@ connectDB =require('./config/database.js')
 const app = express();
 const User = require('./models/user')
 const cookieParser = require('cookie-parser')
+const cors = require('cors')
 
 // const jwt = require('jsonwebtoken')
 // const bcrypt = require('bcrypt')
@@ -11,6 +12,10 @@ const cookieParser = require('cookie-parser')
 app.use(express.json())
 app.use(express.static("public"))
 app.use(cookieParser())
+app.use(cors({
+    origin:"http://localhost:5173",
+    credentials:true
+}))
 
 const authRouter    =  require('./routes/auth.js')
 const profileRouter =  require('./routes/profile.js')

@@ -94,8 +94,7 @@ authRouter.post("/login", async(req,res)=>{
             // const token = jwt.sign({_id:user._id}, "SECRET_KEY", {expiresIn:"1d"})
 
             res.cookie("token", token)
-            res.send("Login Successful")
-
+            res.json({ message: "Login Successful",  data: user})
 
         
     } catch (error) {
@@ -109,7 +108,7 @@ authRouter.post("/logout", async(req,res)=>{
 
         res.clearCookie("token");   //1st way
 
-        res.cookie("token", null , {expires: new Date(Date.now())}) //2nd way
+        // res.cookie("token", null , {expires: new Date(Date.now())}) //2nd way
         res.send("Logout Successfull")
         
     } catch (error) {
