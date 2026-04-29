@@ -76,6 +76,15 @@ const bcrypt = require("bcrypt")
     skills:{
         type:[String],
     },
+    role: {
+  type: String,
+  default: "Not specified"
+},
+
+experience: {
+  type: Number,
+  default: 0
+},
 
  }, 
  {

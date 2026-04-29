@@ -24,7 +24,8 @@ authRouter.post("/signup", async (req, res) => {
 
     }
 
-    const allowedFields = ["firstName", "lastName", "emailId", "password", "age", "gender", "photoUrl", "about", "skills"];
+    const allowedFields = ["firstName", "lastName", "emailId", "password", "age", "gender", "photoUrl", "about", "skills",
+                       "experience", "role"];
 
     const data = {};
     Object.keys(req.body).forEach((key) => {
@@ -101,7 +102,7 @@ authRouter.post("/login", async (req, res) => {
 
 
   } catch (error) {
-    res.status(400).send("Error in login the User" + error.message)
+    res.status(400).json({ message: error.message })
   }
 
 })

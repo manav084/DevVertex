@@ -13,7 +13,7 @@ userRouter.get("/user/requests/received", userAuth, async(req,res)=> {
    const connectionRequests = await ConnectionRequest.find({
     toUserId: loggedInUser._id ,
     status: "interested"
-   }).populate("fromUserId",["firstName","lastName","photoUrl","age","gender","about","skills"])
+   }).populate("fromUserId",["firstName","lastName","photoUrl","age","gender","about","skills","experience","role"])
 
  
 
@@ -53,8 +53,8 @@ userRouter.get("/user/connections", userAuth, async(req,res)=>{
 
       
       
-    ).populate("fromUserId",["firstName","lastName","photoUrl","age","gender","about","skills"])
-     .populate("toUserId",["firstName","lastName","photoUrl","age","gender","about","skills"])
+    ).populate("fromUserId",["firstName","lastName","photoUrl","age","gender","about","skills","experience","role"])
+     .populate("toUserId",["firstName","lastName","photoUrl","age","gender","about","skills","experience","role"])
 
      if(connectionRequests.length === 0){
       return res.status(200).json({message: "No connections found", data:[]})
@@ -79,7 +79,7 @@ userRouter.get("/user/connections", userAuth, async(req,res)=>{
   }
 })
 
-userRouter.get("/user/feed", userAuth, async(req,res)=>{
+userRouter.get("/feed", userAuth, async(req,res)=>{
   try {
     const loggedInUser = req.user ;
 
@@ -110,7 +110,7 @@ userRouter.get("/user/feed", userAuth, async(req,res)=>{
            {_id: {$ne: loggedInUser._id}}
       ]
    
-    }).select("firstName lastName photoUrl about skills").skip(skip).limit(limit)
+    }).select("firstName lastName photoUrl about skills experience role").skip(skip).limit(limit)
 
      return res.json({
     message: "Feed fetched successfully",
