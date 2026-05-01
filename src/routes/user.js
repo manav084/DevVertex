@@ -27,8 +27,7 @@ userRouter.get("/user/requests/received", userAuth, async(req,res)=> {
              data: connectionRequests })
     
  } catch (error) {
-     res.status(400).send("Error:" + error.message)
- }
+res.status(400).json({ message: error.message }) }
     
 
 
@@ -74,7 +73,7 @@ userRouter.get("/user/connections", userAuth, async(req,res)=>{
 
   }
  catch (error) {
-         res.status(400).send("Error:" + error.message)
+res.status(400).json({ message: error.message })
 
   }
 })
@@ -120,7 +119,7 @@ userRouter.get("/feed", userAuth, async(req,res)=>{
 
     
   } catch (error) {
-    res.status(400).send("Error:" + error.message)
+res.status(400).json({ message: error.message })
   }
 })
 

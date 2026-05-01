@@ -39,15 +39,16 @@ app.get("/getuser", async (req,res)=> {
       
     const user = await User.findOne({ emailId : userEmail})
     if(user){
-    res.send(user)
+    res.json({ message: "User fetched successfully", data: user })
+
 }else{
-     res.status(404).send("Error not finding the user email")
+     res.status(404).json({ message: "User not found" })
 }
 
 
    } catch (error) {
 
- res.status(400).send("Error saving the User" + err.message)    
+res.status(400).json({ message: error.message })
    }
 
 
@@ -64,15 +65,15 @@ app.get("/feed", async (req,res)=> {
 
         if(users.length> 0){
 
-            res.send(users)
+            res.json({ message: "Feed fetched successfully", data: users })
         }else{
-            res.status(404).send("Unable to fetch user data")
+res.status(404).json({ message: "No users found" })
         }
 
         
     } catch (error) {
 
-         res.status(400).send("Error saving the User" + error.message)    
+res.status(400).json({ message: error.message })
 
 
         
@@ -90,13 +91,15 @@ app.delete("/user", async (req,res)=> {
       try {
         const user = await User.findByIdAndDelete(deleteId)
         if(user){
-        res.send("User Deleted Successfully")
+res.json({ message: "User deleted successfully" })
         }else{
-            res.status(404).send("User  already deleted or User does not created")
+            // res.status(404).send("User  already deleted or User does not created")
+            res.status(404).json({ message: "User not found" })
+
         }
     } catch (error) {
 
-         res.status(400).send("Error saving the User" + error.message)    
+res.status(400).json({ message: error.message })
 
     }
 })
@@ -111,7 +114,9 @@ app.patch("/user/:userId", async (req,res)=>{
     const updatedData = req.body
 
     if (!userId) {
-  return res.status(400).send("UserId is required");
+//   return res.status(400).send("UserId is required");
+   return res.status(400).json({ message: "UserId is required" })
+
 }
 
 
@@ -124,7 +129,8 @@ app.patch("/user/:userId", async (req,res)=>{
     })
 
     if(!isAllowedUpdates){
-      return   res.status(400).send("Updates not allowed")
+    //   return   res.status(400).send("Updates not allowed")
+   return res.status(400).json({ message: "Updates not allowed" })
     }
 
       
@@ -133,7 +139,8 @@ app.patch("/user/:userId", async (req,res)=>{
 
         if(updatedData.skills){
             if(!Array.isArray(updatedData.skills)){
-                   return res.status(400).send("Skills must be an array");
+                //    return res.status(400).send("Skills must be an array");
+                return res.status(400).json({ message: "Skills must be an array" })
             }
         
 
@@ -150,15 +157,15 @@ app.patch("/user/:userId", async (req,res)=>{
     }
          const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {new:true, runValidators:true})
 
-         res.send({
-            message: "User updated successfully",
-            data: updatedUser })
-
+        //  res.send({
+        //     message: "User updated successfully",
+        //     data: updatedUser })
+        res.json({ message: "User updated successfully", data: updatedUser })
 
         
     } catch (error) {
 
-            res.status(400).send("Update failed" + error.message)    
+res.status(400).json({ message: error.message })
 
         
     }

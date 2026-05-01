@@ -80,7 +80,7 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async(req,res
 
         
     } catch (error) {
-         res.status(400).send("Error:" + error.message)
+        res.status(401).json({ message: error.message })
     }
 
 })       
