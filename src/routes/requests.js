@@ -13,7 +13,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req,res)=
     const allowedStatus = ["ignored","interested"]
 
     if(!allowedStatus.includes(status)){
-        throw new Error("Invalid status type:" +status)}
+        throw new Error("Invalid status type:" +status)} 
 
     const connectionRequest = new ConnectionRequest({
         fromUserId,
