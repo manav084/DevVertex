@@ -4,6 +4,7 @@ const app = express();
 const User = require('./models/user')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
+require('dotenv').config()
 
 // const jwt = require('jsonwebtoken')
 // const bcrypt = require('bcrypt')
@@ -193,7 +194,7 @@ app.get("/get-cookie",(req,res)=>{
 connectDB().then(()=>{
 
     console.log("Database conneciton established");
-    app.listen(3000, ()=> {
+    app.listen(process.env.PORT, ()=> {
     console.log(`Server is running at Port Number - 3000`);
     
 })

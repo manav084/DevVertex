@@ -123,6 +123,28 @@ res.status(400).json({ message: error.message })
   }
 })
 
+
+userRouter.get("/feed/public", async(req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1
+        let limit = parseInt(req.query.limit) || 10
+        limit = limit > 50 ? 50 : limit
+        const skip = (page - 1) * limit
+
+        const users = await User.find({})
+            .select("firstName lastName photoUrl about skills experience role")
+            .skip(skip)
+            .limit(limit)
+
+        return res.json({
+            message: "Feed fetched successfully",
+            data: users
+        })
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+    }
+})
+
 module.exports = userRouter ;
 
 
