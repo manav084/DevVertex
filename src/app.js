@@ -14,7 +14,7 @@ app.use(express.json())
 app.use(express.static("public"))
 app.use(cookieParser())
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin:"https://main.d1ni78k0hwhphd.amplifyapp.com",
     credentials:true
 }))
 
