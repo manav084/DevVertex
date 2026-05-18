@@ -13,11 +13,11 @@ require('dotenv').config()
 app.use(express.json())
 app.use(express.static("public"))
 app.use(cookieParser())
-app.use(cors())
-// app.use(cors({
-//     origin:"https://main.d1ni78k0hwhphd.amplifyapp.com",
-//     credentials:true
-// }))
+// app.use(cors())
+app.use(cors({
+    origin:"https://main.d1ni78k0hwhphd.amplifyapp.com",
+    credentials:true
+}))
 
 const authRouter    =  require('./routes/auth.js')
 const profileRouter =  require('./routes/profile.js')
