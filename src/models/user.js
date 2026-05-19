@@ -30,7 +30,7 @@ const bcrypt = require("bcrypt")
 
         validate(value){
             if(!validator.isEmail(value)){
-                throw new error("Invalid email format")
+                throw new Error("Invalid email format")
             }
         }
 
@@ -42,7 +42,7 @@ const bcrypt = require("bcrypt")
 
          validate(value){
             if(!validator.isStrongPassword(value)){
-                throw new error("Password is not strong enough")
+                throw new Error("Password is not strong enough")
             }
         }
 

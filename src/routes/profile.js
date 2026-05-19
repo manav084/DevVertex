@@ -60,18 +60,18 @@ profileRouter.patch("/profile/edit", userAuth, async (req,res) =>{
     } catch (error) {
        res.status(400).json({ message: error.message })
     }
- authRouter.post("/logout", async (req, res) => {
-  try {
+//  authRouter.post("/logout", async (req, res) => {
+//   try {
 
-    res.clearCookie("token");   //1st way
+//     res.clearCookie("token");   //1st way
 
-    // res.cookie("token", null , {expires: new Date(Date.now())}) //2nd way
-    res.send("Logout Successfull")
+//     // res.cookie("token", null , {expires: new Date(Date.now())}) //2nd way
+//     res.send("Logout Successfull")
 
-  } catch (error) {
-    res.status(400).send("Error in logout " + error.message);
-  }
-})
+//   } catch (error) {
+//     res.status(400).send("Error in logout " + error.message);
+//   }
+// })
 
 } )
 

@@ -15,8 +15,12 @@ app.use(express.static("public"))
 app.use(cookieParser())
 // app.use(cors())
 app.use(cors({
-    origin:"https://main.d1ni78k0hwhphd.amplifyapp.com",
-    credentials:true
+    origin: [
+        "http://localhost:5173",
+        "https://main.d1ni78k0hwhphd.amplifyapp.com",
+        "https://dev-vertex-ebon.vercel.app"
+    ],
+    credentials: true
 }))
 
 const authRouter    =  require('./routes/auth.js')

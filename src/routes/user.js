@@ -5,146 +5,151 @@ const userRouter = express.Router()
 const User = require('../models/user')
 
 // Get all the pending connection requests for the loggedin user
-userRouter.get("/user/requests/received", userAuth, async(req,res)=> {
- try {
+userRouter.get("/user/requests/received", userAuth, async (req, res) => {
+  try {
 
     const loggedInUser = req.user
 
-   const connectionRequests = await ConnectionRequest.find({
-    toUserId: loggedInUser._id ,
-    status: "interested"
-   }).populate("fromUserId",["firstName","lastName","photoUrl","age","gender","about","skills","experience","role"])
+    const connectionRequests = await ConnectionRequest.find({
+      toUserId: loggedInUser._id,
+      status: "interested"
+    }).populate("fromUserId", ["firstName", "lastName", "photoUrl", "age", "gender", "about", "skills", "experience", "role"])
 
- 
 
-   if(connectionRequests.length === 0){
-     return res.status(200).json({
-        message:"No pending connection requests found",
+
+    if (connectionRequests.length === 0) {
+      return res.status(200).json({
+        message: "No pending connection requests found",
         data: []
-     })
-   }
-    return  res.status(200).json({message:"Incoming connection requests retrieved successfully",
-             data: connectionRequests })
-    
- } catch (error) {
-res.status(400).json({ message: error.message }) }
-    
+      })
+    }
+    return res.status(200).json({
+      message: "Incoming connection requests retrieved successfully",
+      data: connectionRequests
+    })
+
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+
 
 
 })
 
-userRouter.get("/user/connections", userAuth, async(req,res)=>{
+userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
 
-    const loggedInUser = req.user 
+    const loggedInUser = req.user
 
-      
+
     const connectionRequests = await ConnectionRequest.find({
-        status: "accepted",
-        $or:[
-        
-        { toUserId : loggedInUser._id},
+      status: "accepted",
+      $or: [
+
+        { toUserId: loggedInUser._id },
         { fromUserId: loggedInUser._id }
-        
+
       ],
 
     }
 
-      
-      
-    ).populate("fromUserId",["firstName","lastName","photoUrl","age","gender","about","skills","experience","role"])
-     .populate("toUserId",["firstName","lastName","photoUrl","age","gender","about","skills","experience","role"])
 
-     if(connectionRequests.length === 0){
-      return res.status(200).json({message: "No connections found", data:[]})
 
-     }
+    ).populate("fromUserId", ["firstName", "lastName", "photoUrl", "age", "gender", "about", "skills", "experience", "role"])
+      .populate("toUserId", ["firstName", "lastName", "photoUrl", "age", "gender", "about", "skills", "experience", "role"])
 
-     const data = connectionRequests.map((row)=> {
-        if(row.fromUserId._id.toString() === loggedInUser._id.toString()){
-          return row.toUserId
-        }
-        return row.fromUserId
-     })
+    if (connectionRequests.length === 0) {
+      return res.status(200).json({ message: "No connections found", data: [] })
 
-      return  res.status(200).json({message:"Incoming connection requests fetched successfully",
-             data: data })
+    }
+
+    const data = connectionRequests.map((row) => {
+      if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
+        return row.toUserId
+      }
+      return row.fromUserId
+    })
+
+    return res.status(200).json({
+      message: "Incoming connection requests fetched successfully",
+      data: data
+    })
 
 
   }
- catch (error) {
-res.status(400).json({ message: error.message })
+  catch (error) {
+    res.status(400).json({ message: error.message })
 
   }
 })
 
-userRouter.get("/feed", userAuth, async(req,res)=>{
+userRouter.get("/feed", userAuth, async (req, res) => {
   try {
-    const loggedInUser = req.user ;
+    const loggedInUser = req.user;
 
-    const page =  parseInt(req.query.page) || 1
+    const page = parseInt(req.query.page) || 1
     let limit = parseInt(req.query.limit) || 10
-        limit = limit > 50 ? 50 : limit
-    const skip = (page-1) * limit
+    limit = limit > 50 ? 50 : limit
+    const skip = (page - 1) * limit
 
     const ConnectionRequests = await ConnectionRequest.find({
-      $or:[
+      $or: [
 
-        {toUserId: loggedInUser._id},{fromUserId: loggedInUser._id},
+        { toUserId: loggedInUser._id }, { fromUserId: loggedInUser._id },
 
       ]
     }).select("fromUserId toUserId")
 
     const hideUsersFromFeed = new Set()
 
-    ConnectionRequests.forEach((req)=>{
+    ConnectionRequests.forEach((req) => {
       hideUsersFromFeed.add(req.fromUserId.toString())
       hideUsersFromFeed.add(req.toUserId.toString())
     })
 
     const users = await User.find({
 
-      $and: [{ _id: {$nin: Array.from(hideUsersFromFeed)}},
+      $and: [{ _id: { $nin: Array.from(hideUsersFromFeed) } },
 
-           {_id: {$ne: loggedInUser._id}}
+      { _id: { $ne: loggedInUser._id } }
       ]
-   
+
     }).select("firstName lastName photoUrl about skills experience role").skip(skip).limit(limit)
 
-     return res.json({
-    message: "Feed fetched successfully",
-    data: users
-  });
-     
+    return res.json({
+      message: "Feed fetched successfully",
+      data: users
+    });
 
-    
+
+
   } catch (error) {
-res.status(400).json({ message: error.message })
+    res.status(400).json({ message: error.message })
   }
 })
 
 
-userRouter.get("/feed/public", async(req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1
-        let limit = parseInt(req.query.limit) || 10
-        limit = limit > 50 ? 50 : limit
-        const skip = (page - 1) * limit
+userRouter.get("/feed/public", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1
+    let limit = parseInt(req.query.limit) || 10
+    limit = limit > 50 ? 50 : limit
+    const skip = (page - 1) * limit
 
-        const users = await User.find({})
-            .select("firstName lastName photoUrl about skills experience role")
-            .skip(skip)
-            .limit(limit)
+    const users = await User.find({})
+      .select("firstName lastName photoUrl about skills experience role")
+      .skip(skip)
+      .limit(limit)
 
-        return res.json({
-            message: "Feed fetched successfully",
-            data: users
-        })
-    } catch (error) {
-        res.status(400).json({ message: error.message })
-    }
+    return res.json({
+      message: "Feed fetched successfully",
+      data: users
+    })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
 })
 
-module.exports = userRouter ;
+module.exports = userRouter;
 
 
