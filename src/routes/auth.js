@@ -14,12 +14,7 @@ authRouter.post("/signup", async (req, res) => {
   // const user = new User(req.body)
   try {
 
-    const isValid = validateSignUpData(req);
-
-    if(!isValid){
-      return res.status(400).send("Invalid Sign Up Data")
-    }
-
+    validateSignUpData(req)
     
     const { emailId } = req.body
     const existingUser = await User.findOne({ emailId })
